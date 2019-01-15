@@ -1,0 +1,115 @@
+package client;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import org.json.JSONObject;
+import client.LoggingClient.IStreamListener;
+import commander.ICommander;
+import commander.IEventListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author julian
+ */
+public class CommanderClient implements ICommander, IStreamListener {
+    
+    private static final Logger LOGGER = Logger.getLogger(CommanderClient.class.getName());
+    
+    private static final int SO_TIMEOUT_MILLIS = 5000;
+
+    private final String host;
+    private final int cport;
+    private final int lport;
+    
+    private Socket socket;
+    private BufferedReader br;
+    private PrintWriter pw;
+    private LoggingClient logging;
+    private IEventListener listener;
+    
+    public CommanderClient(String host, int cport, int lport) { 
+        this.host = host;
+        this.cport = cport;
+        this.lport = lport;
+    }
+
+    // API
+    
+    public void startLogging(IEventListener listener) {
+        this.listener = listener;
+        this.logging = new LoggingClient(this.host, this.lport, this);
+        new Thread(logging, "commander-client").start();
+    }
+    
+    public void shutdownLogging() {
+        this.logging.shutdown();
+    }
+    
+    public void connect() {
+        
+        try {
+            this.socket = new Socket(this.host, this.cport);
+            this.socket.setSoTimeout(SO_TIMEOUT_MILLIS);
+            this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));            
+            this.pw = new PrintWriter(socket.getOutputStream(), true); // autoflush
+            
+        } catch (IOException ex) {
+            throw new IORuntimeException(ex);
+        }
+    }
+    
+    @Override
+    public JSONObject execute(JSONObject command) {
+        
+        try {
+            this.pw.println(command);
+            String response = this.br.readLine();
+            LOGGER.log(Level.INFO, "response is {0}", response);
+            return new JSONObject(response);
+        } catch (IOException ex) {
+            throw new IORuntimeException(ex);
+        }
+    }
+    
+    public void disconnect() {
+        
+        try {
+            this.br.close();
+            this.pw.close();
+            this.socket.close();
+            
+        } catch (IOException ex) {
+            throw new IORuntimeException(ex);
+        }
+    }
+    
+    // STREAM LISTENER
+    
+    @Override
+    public void startOfStream() {      
+        LOGGER.log(Level.INFO, "stream start");
+    }
+
+    @Override
+    public void process(String line) {
+        JSONObject json = new JSONObject(line);
+        if (json.has("keepalive")) {
+            LOGGER.log(Level.INFO, "keepalive {0}", json.getString("keepalive"));
+        }
+        else {
+            this.listener.handleEvent(json);        
+            LOGGER.log(Level.INFO, "logging:{0}", json.toString(4));    
+        }        
+    }
+
+    @Override
+    public void endOfStream() {   
+        LOGGER.log(Level.INFO, "stream end");
+    }    
+    
+}
