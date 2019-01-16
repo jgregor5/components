@@ -111,7 +111,7 @@ public class ComponentManager implements IEventListener, IEventSource, IComponen
         String commandStr = command.getString("command");
         ICommander commander = this.commands.get(commandStr);
         if (commander == null) {
-            LOGGER.log(Level.SEVERE, "unknown command: " + commandStr);
+            LOGGER.log(Level.SEVERE, "unknown command: {0}", commandStr);
             return getErrorJSON("unknown command:  " + commandStr);
         }
         else {

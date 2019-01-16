@@ -38,13 +38,14 @@ public class CommandTask implements Callable<Void> {
                     LOGGER.log(Level.INFO, "command:{0}", command.toString(4));
                     JSONObject result = ComponentManager.getInstance().execute(command);
                     LOGGER.log(Level.INFO, "response:{0}", result.toString(4));
-                    pw.println(result.put("success", true));
+                    pw.println(result);
                     
                 } catch (Throwable t) {
+                    LOGGER.log(Level.SEVERE, "executing command", t);
                     JSONObject error = new JSONObject().
-                            put("class", t.getClass().getName()).
-                            put("message", t.getMessage());                    
-                    pw.println(error.put("success", false));
+                            put("success", false).
+                            put("error", t.getMessage());
+                    pw.println(error);
                 }
             }
 

@@ -84,6 +84,8 @@
             <fileset dir="build/classes">
                 <include name="client/**"/>
                 <include name="commander/**"/>
+                <include name="implement/**"/>
+                <include name="META-INF/services/commander.IComponent"/>
             </fileset>
         </jar>
     </target>

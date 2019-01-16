@@ -54,6 +54,7 @@ public class SocketHandler implements Runnable {
             }
 
         } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, "server at {0}", this.port);
             throw new RuntimeException(ex);
         }
     }
