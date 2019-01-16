@@ -2,10 +2,6 @@ package sample;
 
 import commander.ComponentManager;
 import commander.IComponent;
-import commander.IEventListener;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONObject;
@@ -18,10 +14,7 @@ public class MyComponent2 implements IComponent {
     
     private static final Logger LOGGER = Logger.getLogger(MyComponent2.class.getName());
     
-    private Set<IEventListener> listeners;
-    
     public MyComponent2() {
-        this.listeners = new HashSet<>();
     }
 
     @Override
@@ -30,8 +23,8 @@ public class MyComponent2 implements IComponent {
     }
 
     @Override
-    public Set<String> getCommands() {
-        return new HashSet<>(Arrays.asList(new String[]{"bye"}));
+    public String[] getCommands() {
+        return new String[]{"bye"};
     }
 
     @Override
@@ -41,16 +34,6 @@ public class MyComponent2 implements IComponent {
         }
         
         throw new UnsupportedOperationException("Not supported");
-    }
-
-    @Override
-    public void registerListener(IEventListener listener) {
-        this.listeners.add(listener);
-    }
-
-    @Override
-    public void unregisterListener(IEventListener listener) {
-        this.listeners.remove(listener);
     }
     
     public static void main(String[] args) {

@@ -1,13 +1,11 @@
 package commander;
 
-import java.util.Set;
-
 /**
  *
  * @author julian
  */
-public interface IComponent extends ICommander, IEventSource {
+public interface IComponent extends ICommander {
     
     String getName();
-    Set<String> getCommands();
+    String[] getCommands();
 }

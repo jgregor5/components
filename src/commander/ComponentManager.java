@@ -3,6 +3,7 @@ package commander;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,7 +19,7 @@ import org.json.JSONObject;
  *
  * @author julian
  */
-public class ComponentManager implements IEventListener, IComponent {
+public class ComponentManager implements IEventListener, IEventSource, IComponent {
     
     private final static Logger LOGGER = Logger.getLogger(ComponentManager.class.getName());
     
@@ -54,16 +55,18 @@ public class ComponentManager implements IEventListener, IComponent {
                 }
             }
             
-            component.registerListener(this);
+            if (component instanceof IEventSource) {
+                ((IEventSource) component).registerListener(this);
+            }
             
             Package packinfo = component.getClass().getPackage();
-            String implVersion = packinfo == null? "?" : packinfo.getImplementationVersion();
+            String implVersion = packinfo == null? "unknown" : packinfo.getImplementationVersion();
             if (implVersion == null) {
-                implVersion = "?.?";
+                implVersion = "unknown";
             }
             
             LOGGER.log(Level.CONFIG, "registered {0} from {1} version {2}", 
-                    new Object[]{component.getCommands(), component.getName(), implVersion});     
+                    new Object[]{Arrays.toString(component.getCommands()), component.getName(), implVersion});     
         }
     }
     
@@ -93,26 +96,38 @@ public class ComponentManager implements IEventListener, IComponent {
     }
 
     @Override
-    public Set<String> getCommands() {
-        return this.commands.keySet();
+    public String[] getCommands() {
+        return this.commands.keySet().toArray(new String[this.commands.size()]);
     }
 
     @Override
     public JSONObject execute(JSONObject command) {
         
         if (!command.has("command")) {
-            throw new RuntimeException("command not found in " + command);
+            LOGGER.log(Level.SEVERE, "command key is missing");
+            return getErrorJSON("command key is missing");
         }
         
         String commandStr = command.getString("command");
         ICommander commander = this.commands.get(commandStr);
         if (commander == null) {
-            throw new RuntimeException("commander not found for " + command);
+            LOGGER.log(Level.SEVERE, "commander not found for " + commandStr);
+            return getErrorJSON("commander not found for " + commandStr);
         }
         else {
-            // TODO synchronized here?
-            return commander.execute(command);
+            try {
+                // TODO synchronized here?
+                return commander.execute(command);
+                
+            } catch (Throwable t) {
+                LOGGER.log(Level.SEVERE, "executing " + commandStr, t);
+                return getErrorJSON(t.getMessage());
+            }
         }
+    }
+    
+    private JSONObject getErrorJSON(String message) {
+        return new JSONObject().put("success", false).put("error", message);
     }
     
     private static void configureLogging() {

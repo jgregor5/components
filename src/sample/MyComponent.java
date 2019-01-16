@@ -1,12 +1,12 @@
 package sample;
 
 import commander.ComponentManager;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
 import commander.IEventListener;
 import commander.IComponent;
+import commander.IEventSource;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  *
  * @author julian
  */
-public class MyComponent implements IComponent {
+public class MyComponent implements IComponent, IEventSource {
     
     private static final Logger LOGGER = Logger.getLogger(MyComponent.class.getName());
 
@@ -30,8 +30,8 @@ public class MyComponent implements IComponent {
     }
     
     @Override
-    public Set<String> getCommands() {
-        return new HashSet<>(Arrays.asList(new String[]{"hello"}));
+    public String[] getCommands() {
+        return new String[]{"hello"};
     }
 
     @Override
