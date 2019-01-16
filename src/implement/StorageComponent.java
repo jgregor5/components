@@ -1,14 +1,11 @@
 package implement;
 
-import commander.ComponentManager;
 import commander.IComponent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -17,8 +14,6 @@ import org.json.JSONTokener;
  * @author julian
  */
 public class StorageComponent implements IComponent {
-    
-    private static final Logger LOGGER = Logger.getLogger(StorageComponent.class.getName());
     
     public StorageComponent() {
     }
@@ -41,7 +36,9 @@ public class StorageComponent implements IComponent {
         String cmd = command.getString("command");
         String key = command.getString("key");
         if (!key.matches("^[-_.A-Za-z0-9]+$")) {
-            return new JSONObject().put("success", false).put("error", "ilegal key format");
+            return new JSONObject().
+                    put("success", false).
+                    put("error", "ilegal key format: " + key);
         }
         
         switch (cmd) {
@@ -100,10 +97,14 @@ public class StorageComponent implements IComponent {
         
         try {
             JSONTokener tokener = new JSONTokener(new FileInputStream(getStorageFile(key)));
-            return new JSONObject().put("success", true).put("data", new JSONObject(tokener));
+            return new JSONObject().
+                    put("success", true).
+                    put("data", new JSONObject(tokener));
 
         } catch (FileNotFoundException ex) {
-            return new JSONObject().put("success", true).put("data", new JSONObject());
+            return new JSONObject().
+                    put("success", true).
+                    put("data", new JSONObject());
         }
     }
         
@@ -121,57 +122,4 @@ public class StorageComponent implements IComponent {
         }
     }
     
-    public static void main(String[] args) {
-        
-        increment();
-        loadanddelete();
-    }
-    
-    public static void loadanddelete() {
-        
-        ComponentManager manager = ComponentManager.getInstance();
-        
-        JSONObject command = new JSONObject().
-                put("command", "storage.load").
-                put("key", "test.counter");
-        
-        JSONObject result = manager.execute(command);
-        LOGGER.log(Level.INFO, "load result:{0}", result.toString(4));
-        
-        command = new JSONObject().
-                put("command", "storage.delete").
-                put("key", "test.counter");
-        
-        result = manager.execute(command);
-        LOGGER.log(Level.INFO, "delete result:{0}", result.toString(4));
-        
-    }
-    
-    public static void increment() {
-        
-        ComponentManager manager = ComponentManager.getInstance();
-        
-        JSONObject initialData = new JSONObject().put("counter", 0);
-        
-        JSONObject command = new JSONObject().
-                put("command", "storage.loadorsave").
-                put("key", "test.counter").
-                put("data", initialData);
-        
-        JSONObject result = manager.execute(command);
-        LOGGER.log(Level.INFO, "loadorsave result:{0}", result.toString(4));
-        
-        if (result.getBoolean("success")) {
-            JSONObject data = result.getJSONObject("data");
-            data.put("counter", data.getInt("counter") + 1);
-            
-            command = new JSONObject().
-                    put("command", "storage.save").
-                    put("key", "test.counter").
-                    put("data", data);
-            
-            manager.execute(command);
-            LOGGER.log(Level.INFO, "save result:{0}", result.toString(4));
-        }
-    }
 }
