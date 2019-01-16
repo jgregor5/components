@@ -62,7 +62,7 @@ public class StorageTest {
                     put("key", "test.counter").
                     put("data", data);
             
-            manager.execute(command);
+            result = manager.execute(command);
             LOGGER.log(Level.INFO, "save result:{0}", result.toString(4));
         }
     }
