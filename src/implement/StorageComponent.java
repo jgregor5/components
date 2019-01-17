@@ -1,13 +1,13 @@
 package implement;
 
 import commander.IComponent;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  *
@@ -95,16 +95,18 @@ public class StorageComponent implements IComponent {
     
     private JSONObject exload(String key) {
         
-        try {
-            JSONTokener tokener = new JSONTokener(new FileInputStream(getStorageFile(key)));
+        try (BufferedReader br = new BufferedReader(new FileReader(getStorageFile(key)))) {
+            
             return new JSONObject().
                     put("success", true).
-                    put("data", new JSONObject(tokener));
-
+                    put("data", new JSONObject(br.readLine()));
+            
         } catch (FileNotFoundException ex) {
             return new JSONObject().
                     put("success", true).
                     put("data", new JSONObject());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
         

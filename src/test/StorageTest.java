@@ -17,6 +17,20 @@ public class StorageTest {
         
         increment();
         loadanddelete();
+        //delete();
+    }
+    
+    public static void delete() {
+        
+        ComponentManager manager = ComponentManager.getInstance();
+        
+        JSONObject command = new JSONObject().
+                put("command", "storage.delete").
+                put("key", "test.counter");
+        
+        JSONObject result = manager.execute(command);
+        LOGGER.log(Level.INFO, "delete result:{0}", result.toString(4));
+        
     }
     
     public static void loadanddelete() {
