@@ -19,7 +19,7 @@ import org.json.JSONObject;
  *
  * @author julian
  */
-public class ComponentManager implements IEventListener, IEventSource, IComponent {
+public class ComponentManager implements IEventListener, IEventSource, IComponent, AutoCloseable {
     
     private final static Logger LOGGER = Logger.getLogger(ComponentManager.class.getName());
     
@@ -64,6 +64,21 @@ public class ComponentManager implements IEventListener, IEventSource, IComponen
                         Arrays.toString(component.getCommands()), 
                         component.getName(), 
                         getVersion(component)});     
+        }
+    }
+    
+    @Override
+    public void close() throws Exception {
+        Iterator<IComponent> components = this.loader.iterator();
+        while (components.hasNext()) {
+            IComponent component = components.next();
+            if (component instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) component).close();
+                } catch (Throwable t) {
+                    LOGGER.log(Level.SEVERE, "closing component", t);
+                }
+            }
         }
     }
     
