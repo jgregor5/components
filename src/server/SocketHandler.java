@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,22 +13,22 @@ import java.util.logging.Logger;
  *
  * @author julian
  */
-public class SocketHandler implements Runnable {
+public class SocketHandler implements Runnable, AutoCloseable {
     
     private static final Logger LOGGER = Logger.getLogger(SocketHandler.class.getName());
     
     private static final int POOL_SIZE = 50;
     private static final int SO_TIMEOUT_MILLIS = 5000;
 
-    private int port;
+    private final int port;
+    private final ExecutorService pool;
+    private final ICallableCreator creator;
     private boolean enabled;
-    private ExecutorService pool;
     private ServerSocket server;
-    private ICallableCreator creator;
-
+        
     public SocketHandler(int port, ICallableCreator creator) {
         this.port = port;
-        this.pool = Executors.newFixedThreadPool(POOL_SIZE);
+        this.pool = new MyThreadPoolExecutor("" + port, POOL_SIZE);
         this.server = null;
         this.enabled = true;
         this.creator = creator;
@@ -59,8 +58,14 @@ public class SocketHandler implements Runnable {
         }
     }
     
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    @Override
+    public void close() {
+        this.enabled = false;
+        try {
+            this.pool.shutdownNow();
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, null, t); 
+        }
     }
     
     public interface ICallableCreator {    
