@@ -23,11 +23,14 @@ public class MyClient implements IEventListener {
     public static void main(String[] args) throws IOException {
         
         MyClient client = new MyClient();
-        CommanderClient commander = new CommanderClient("localhost", 9000, 9001);
-        commander.startLogging(client);
+        CommanderClient commander = new CommanderClient("localhost");
+        commander.startListening(9001, client);
         
         JSONObject response;        
-        commander.connect();
+        commander.connect(9000);
+        
+        response = commander.execute(new JSONObject().put("command", "info.components"));
+        LOGGER.log(Level.INFO, "response:{0}", response.toString(4));
         
         response = commander.execute(new JSONObject().put("command", "hello"));  
         LOGGER.log(Level.INFO, "response:{0}", response.toString(4));
@@ -46,6 +49,6 @@ public class MyClient implements IEventListener {
         
         commander.disconnect();
 
-        commander.shutdownLogging();
+        commander.stopListening();
     }
 }

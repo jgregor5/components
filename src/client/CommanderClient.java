@@ -9,7 +9,10 @@ import org.json.JSONObject;
 import client.LoggingClient.IStreamListener;
 import commander.ICommander;
 import commander.IEventListener;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -23,8 +26,6 @@ public class CommanderClient implements ICommander, IStreamListener {
     private static final int SO_TIMEOUT_MILLIS = 5000;
 
     private final String host;
-    private final int cport;
-    private final int lport;
     
     private Socket socket;
     private BufferedReader br;
@@ -32,28 +33,27 @@ public class CommanderClient implements ICommander, IStreamListener {
     private LoggingClient logging;
     private IEventListener listener;
     
-    public CommanderClient(String host, int cport, int lport) { 
+    public CommanderClient(String host) { 
         this.host = host;
-        this.cport = cport;
-        this.lport = lport;
+        configureLogging();
     }
 
     // API
     
-    public void startLogging(IEventListener listener) {
+    public void startListening(int port, IEventListener listener) {
         this.listener = listener;
-        this.logging = new LoggingClient(this.host, this.lport, this);
+        this.logging = new LoggingClient(this.host, port, this);
         new Thread(logging, "commander-client").start();
     }
     
-    public void shutdownLogging() {
+    public void stopListening() {
         this.logging.shutdown();
     }
     
-    public void connect() {
+    public void connect(int port) {
         
         try {
-            this.socket = new Socket(this.host, this.cport);
+            this.socket = new Socket(this.host, port);
             this.socket.setSoTimeout(SO_TIMEOUT_MILLIS);
             this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));            
             this.pw = new PrintWriter(socket.getOutputStream(), true); // autoflush
@@ -99,7 +99,7 @@ public class CommanderClient implements ICommander, IStreamListener {
     public void process(String line) {
         JSONObject json = new JSONObject(line);
         if (json.has("keepalive")) {
-            LOGGER.log(Level.INFO, "keepalive {0}", json.getString("keepalive"));
+            LOGGER.log(Level.FINEST, "keepalive {0}", json.getString("keepalive"));
         }
         else {
             this.listener.handleEvent(json);        
@@ -110,6 +110,22 @@ public class CommanderClient implements ICommander, IStreamListener {
     @Override
     public void endOfStream() {   
         LOGGER.log(Level.INFO, "stream end");
+    }    
+
+    // LOGGING
+    
+    private static void configureLogging() {
+        
+        File loggingConfigFile = new File(System.getProperty("user.dir"), "logging.properties");
+        if (loggingConfigFile.exists()) {
+            try {
+                LogManager.getLogManager().readConfiguration(new FileInputStream(loggingConfigFile));
+                LOGGER.log(Level.CONFIG, "configured {0}", loggingConfigFile.getAbsolutePath());
+
+            } catch (IOException | SecurityException t) {
+                LOGGER.log(Level.SEVERE, "reading logging configuration", t);
+            }
+        }
     }    
     
 }

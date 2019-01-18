@@ -59,15 +59,42 @@ public class ComponentManager implements IEventListener, IEventSource, IComponen
                 ((IEventSource) component).registerListener(this);
             }
             
-            Package packinfo = component.getClass().getPackage();
-            String implVersion = packinfo == null? "unknown" : packinfo.getImplementationVersion();
-            if (implVersion == null) {
-                implVersion = "unknown";
-            }
-            
             LOGGER.log(Level.CONFIG, "registered {0} from {1} version {2}", 
-                    new Object[]{Arrays.toString(component.getCommands()), component.getName(), implVersion});     
+                    new Object[]{
+                        Arrays.toString(component.getCommands()), 
+                        component.getName(), 
+                        getVersion(component)});     
         }
+    }
+    
+    private String getVersion(IComponent component) {
+        
+        Package packinfo = component.getClass().getPackage();
+        String implVersion = packinfo == null? "unknown" : packinfo.getImplementationVersion();
+        if (implVersion == null) {
+            implVersion = "unknown";
+        }
+        return implVersion;
+    }
+    
+    public JSONObject getComponentsInfo() {
+        
+        JSONObject result = new JSONObject();
+        
+        Iterator<IComponent> components = this.loader.iterator();
+        while (components.hasNext()) {
+            IComponent component = components.next();
+            String name = component.getClass().getName();
+            
+            JSONObject json = new JSONObject().
+                    put("name", component.getName()).
+                    put("version", getVersion(component)).
+                    put("commands", component.getCommands());
+            
+            result.put(name, json);
+        }
+        
+        return result;
     }
     
     @Override
