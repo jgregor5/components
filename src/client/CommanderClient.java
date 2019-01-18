@@ -70,9 +70,10 @@ public class CommanderClient implements ICommander, IEventSource, IStreamListene
     public JSONObject execute(JSONObject command) {
         
         try {
+            LOGGER.log(Level.FINER, "sending {0}", command);
             this.pw.println(command);
             String response = this.br.readLine();
-            LOGGER.log(Level.INFO, "response is {0}", response);
+            LOGGER.log(Level.FINER, "received {0}", response);
             return new JSONObject(response);
         } catch (IOException ex) {
             throw new IORuntimeException(ex);
@@ -117,10 +118,14 @@ public class CommanderClient implements ICommander, IEventSource, IStreamListene
             LOGGER.log(Level.FINEST, "keepalive {0}", json.getString("keepalive"));
         }
         else {
+            LOGGER.log(Level.FINER, "logging:{0}", json.toString(4)); 
             for (IEventListener listener: this.listeners) {
-                listener.handleEvent(json);            
-            }
-            LOGGER.log(Level.INFO, "logging:{0}", json.toString(4));    
+                try {
+                    listener.handleEvent(json);
+                } catch (Throwable t) {
+                    LOGGER.log(Level.SEVERE, "handing event", t);
+                }            
+            }               
         }        
     }
 
