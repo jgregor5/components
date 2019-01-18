@@ -24,7 +24,8 @@ public class MyClient implements IEventListener {
         
         MyClient client = new MyClient();
         CommanderClient commander = new CommanderClient("localhost");
-        commander.startListening(9001, client);
+        commander.listen(9001);
+        commander.registerListener(client);
         
         JSONObject response;        
         commander.connect(9000);
@@ -48,7 +49,6 @@ public class MyClient implements IEventListener {
         LOGGER.log(Level.INFO, "wake up!");
         
         commander.disconnect();
-
-        commander.stopListening();
+        commander.unlisten();
     }
 }

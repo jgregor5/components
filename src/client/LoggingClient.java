@@ -72,7 +72,7 @@ public class LoggingClient implements Runnable {
                     }
                     
                 } catch (SocketTimeoutException ex) {
-                    LOGGER.log(Level.WARNING, "socket timeout");
+                    LOGGER.log(Level.FINEST, "socket timeout");
                 }
             }
 

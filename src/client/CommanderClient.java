@@ -9,8 +9,11 @@ import org.json.JSONObject;
 import client.LoggingClient.IStreamListener;
 import commander.ICommander;
 import commander.IEventListener;
+import commander.IEventSource;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -19,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author julian
  */
-public class CommanderClient implements ICommander, IStreamListener {
+public class CommanderClient implements ICommander, IEventSource, IStreamListener {
     
     private static final Logger LOGGER = Logger.getLogger(CommanderClient.class.getName());
     
@@ -31,22 +34,22 @@ public class CommanderClient implements ICommander, IStreamListener {
     private BufferedReader br;
     private PrintWriter pw;
     private LoggingClient logging;
-    private IEventListener listener;
+    private Set<IEventListener> listeners;
     
     public CommanderClient(String host) { 
         this.host = host;
+        this.listeners = new HashSet<>();
         configureLogging();
     }
 
     // API
     
-    public void startListening(int port, IEventListener listener) {
-        this.listener = listener;
+    public void listen(int port) {
         this.logging = new LoggingClient(this.host, port, this);
         new Thread(logging, "commander-client").start();
     }
     
-    public void stopListening() {
+    public void unlisten() {
         this.logging.shutdown();
     }
     
@@ -88,6 +91,18 @@ public class CommanderClient implements ICommander, IStreamListener {
         }
     }
     
+    // EVENT SOURCE
+    
+    @Override
+    public void registerListener(IEventListener listener) {
+        this.listeners.add(listener);
+    }
+
+    @Override
+    public void unregisterListener(IEventListener listener) {
+        this.listeners.remove(listener);
+    }
+    
     // STREAM LISTENER
     
     @Override
@@ -102,7 +117,9 @@ public class CommanderClient implements ICommander, IStreamListener {
             LOGGER.log(Level.FINEST, "keepalive {0}", json.getString("keepalive"));
         }
         else {
-            this.listener.handleEvent(json);        
+            for (IEventListener listener: this.listeners) {
+                listener.handleEvent(json);            
+            }
             LOGGER.log(Level.INFO, "logging:{0}", json.toString(4));    
         }        
     }
