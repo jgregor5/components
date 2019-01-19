@@ -28,7 +28,7 @@ public class SocketHandler implements Runnable, AutoCloseable {
         
     public SocketHandler(int port, ICallableCreator creator) {
         this.port = port;
-        this.pool = new MyThreadPoolExecutor("" + port, POOL_SIZE);
+        this.pool = new MyThreadPoolExecutor("port" + port, POOL_SIZE);
         this.server = null;
         this.enabled = true;
         this.creator = creator;
