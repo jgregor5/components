@@ -1,0 +1,33 @@
+run:
+2019-01-18 16:17:53.807 CONFIG  [client.CommanderClient] configured C:\Users\julian\Documents\NetBeansProjects\m06uf4\logging.properties 
+2019-01-18 16:17:53.844 INFO    [client.CommanderClient] stream start 
+> hola
+2019-01-18 16:17:56.052 INFO    [test.ChatTest] julian: hola 
+> 2019-01-18 16:18:14.688 INFO    [test.ChatTest] Eric: holi 
+2019-01-18 16:18:16.845 INFO    [test.ChatTest] Elputoamo: hola que tal 
+2019-01-18 16:18:21.915 INFO    [test.ChatTest] julian: hola 
+2019-01-18 16:18:22.328 INFO    [test.ChatTest] Chechu: Viva Espa�a 
+2019-01-18 16:18:22.989 INFO    [test.ChatTest] juanjo: hola Julii 
+2019-01-18 16:18:24.383 INFO    [test.ChatTest] Ismael: oooooooooooooooooooooooooooooooooooooooooooo 
+2019-01-18 16:18:25.711 INFO    [test.ChatTest] Elputoamo: paga la droga  
+2019-01-18 16:18:28.085 INFO    [test.ChatTest] Tufeck: -.- 
+2019-01-18 16:18:28.636 INFO    [test.ChatTest] Chechu: Esta siendo hackiado 
+2019-01-18 16:18:36.199 INFO    [test.ChatTest] Elputoamo: frutian 
+2019-01-18 16:45:33.496 INFO    [client.LoggingClient] closing client socket 
+Exception in thread "commander-client" client.IORuntimeException: java.net.SocketException: Connection reset
+	at client.LoggingClient.run(LoggingClient.java:82)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: java.net.SocketException: Connection reset
+	at java.net.SocketInputStream.read(SocketInputStream.java:210)
+	at java.net.SocketInputStream.read(SocketInputStream.java:141)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:161)
+	at java.io.BufferedReader.readLine(BufferedReader.java:324)
+	at java.io.BufferedReader.readLine(BufferedReader.java:389)
+	at client.LoggingClient.run(LoggingClient.java:68)
+	... 1 more
+BUILD STOPPED (total time: 35 minutes 33 seconds)
+
