@@ -73,6 +73,20 @@
     
     <property file="build.properties"/>
     
+    <target name="commserver" depends="compile">
+        
+        <manifest file="MANIFEST.MF">
+            <attribute name="Implementation-Version" value="${version}"/> 
+            <attribute name="Built-By" value="${builder}"/>
+        </manifest>
+        
+        <jar destfile="dist/commserver-${version}.jar" manifest="MANIFEST.MF">
+            <fileset dir="build/classes">
+                <include name="server/**"/>
+            </fileset>
+        </jar>
+    </target>
+    
     <target name="commander" depends="compile">
         
         <manifest file="MANIFEST.MF">
