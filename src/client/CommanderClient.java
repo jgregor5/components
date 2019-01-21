@@ -7,9 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import org.json.JSONObject;
 import client.LoggingClient.IStreamListener;
-import commander.ICommander;
 import commander.IEventListener;
-import commander.IEventSource;
+import commander.IManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
  *
  * @author julian
  */
-public class CommanderClient implements ICommander, IEventSource, IStreamListener {
+public class CommanderClient implements IManager, IStreamListener {
     
     private static final Logger LOGGER = Logger.getLogger(CommanderClient.class.getName());
     
@@ -43,6 +42,20 @@ public class CommanderClient implements ICommander, IEventSource, IStreamListene
     }
 
     // API
+    
+    @Override
+    public JSONObject execute(JSONObject command) {
+        
+        try {
+            LOGGER.log(Level.FINER, "sending {0}", command);
+            this.pw.println(command);
+            String response = this.br.readLine();
+            LOGGER.log(Level.FINER, "received {0}", response);
+            return new JSONObject(response);
+        } catch (IOException ex) {
+            throw new IORuntimeException(ex);
+        }
+    }
     
     public void listen(int port) {
         this.logging = new LoggingClient(this.host, port, this);
@@ -66,20 +79,6 @@ public class CommanderClient implements ICommander, IEventSource, IStreamListene
         }
     }
     
-    @Override
-    public JSONObject execute(JSONObject command) {
-        
-        try {
-            LOGGER.log(Level.FINER, "sending {0}", command);
-            this.pw.println(command);
-            String response = this.br.readLine();
-            LOGGER.log(Level.FINER, "received {0}", response);
-            return new JSONObject(response);
-        } catch (IOException ex) {
-            throw new IORuntimeException(ex);
-        }
-    }
-    
     public void disconnect() {
         
         try {
@@ -89,6 +88,22 @@ public class CommanderClient implements ICommander, IEventSource, IStreamListene
             
         } catch (IOException ex) {
             throw new IORuntimeException(ex);
+        }
+    }
+    
+    @Override
+    public void close() {
+        
+        try {
+            unlisten();
+        } catch (Throwable t) {
+            LOGGER.log(Level.SEVERE, null, t);
+        }
+        
+        try {
+            disconnect();
+        } catch (Throwable t) {
+            LOGGER.log(Level.SEVERE, null, t);
         }
     }
     

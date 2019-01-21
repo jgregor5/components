@@ -19,9 +19,12 @@ import org.json.JSONObject;
  *
  * @author julian
  */
-public class ComponentManager implements IEventListener, IEventSource, IComponent, AutoCloseable {
+public class ComponentManager implements IEventListener, IManager {
     
     private final static Logger LOGGER = Logger.getLogger(ComponentManager.class.getName());
+    
+    public final static int COMMAND_PORT = 9000;
+    public final static int LISTEN_PORT = 9001;
     
     private static ComponentManager service;
     private ServiceLoader<IComponent> loader;
@@ -68,7 +71,7 @@ public class ComponentManager implements IEventListener, IEventSource, IComponen
     }
     
     @Override
-    public void close() throws Exception {
+    public void close() {
         Iterator<IComponent> components = this.loader.iterator();
         while (components.hasNext()) {
             IComponent component = components.next();
@@ -132,6 +135,7 @@ public class ComponentManager implements IEventListener, IEventSource, IComponen
         this.listeners.remove(listener);
     }
 
+    /*
     @Override
     public String getName() {
         return this.getClass().getSimpleName();
@@ -140,7 +144,7 @@ public class ComponentManager implements IEventListener, IEventSource, IComponen
     @Override
     public String[] getCommands() {
         return this.commands.keySet().toArray(new String[this.commands.size()]);
-    }
+    }*/
 
     @Override
     public JSONObject execute(JSONObject command) {
