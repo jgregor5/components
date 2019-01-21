@@ -18,17 +18,20 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
     
     private static final Logger LOGGER = Logger.getLogger(CommanderServer.class.getName());
     
+    private final int cport, lport;
     private Set<IEventListener> listeners;
     private SocketHandler commandSH, loggingSH;
     
-    public CommanderServer() {
+    public CommanderServer(int cport, int lport) {
+        this.cport = cport;
+        this.lport = lport;
         this.listeners = new HashSet<>();
         this.commandSH = null;
         this.loggingSH = null;
     }
     
     @Override
-    public void run() {              
+    public void run() {
         
         ComponentManager.getInstance().registerListener(this);
         
@@ -47,7 +50,7 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
     private void startCommandThread() {
         
         this.commandSH = new SocketHandler(
-                9000, (Socket client) -> new CommandTask(client));
+                this.cport, (Socket client) -> new CommandTask(client));
         Thread thread = new Thread(this.commandSH, "command-thread");
         thread.start();
     }
@@ -55,7 +58,7 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
     private void startLoggingThread() {
         
         this.loggingSH = new SocketHandler(
-                9001, (Socket client) -> new LoggingTask(client, this));
+                this.lport, (Socket client) -> new LoggingTask(client, this));
         Thread thread = new Thread(this.loggingSH, "logging-thread");
         thread.start();
     }
@@ -87,7 +90,8 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
     
     public static void main(String[] args) {
         
-        Thread thread = new Thread(new CommanderServer(), "commander-server");
+        Thread thread = new Thread(new CommanderServer(
+                ComponentManager.COMMAND_PORT, ComponentManager.LISTEN_PORT), "commander-server");
         thread.start();
     }
 
