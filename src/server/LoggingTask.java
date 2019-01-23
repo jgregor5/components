@@ -57,7 +57,7 @@ public class LoggingTask implements Callable<Void>, IEventListener {
                     pw.println(new JSONObject().put("keepalive", new Date()));
                 }
                 
-                // acknowledge
+                // TODO: add here a timeout?
                 int ack = is.read();
                 if (ack == EOT) {
                     break;
