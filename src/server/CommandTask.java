@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -42,12 +41,7 @@ public class CommandTask implements Callable<Void> {
                     pw.println(result);
                     
                 } catch (Throwable t) {
-                    if (t instanceof JSONException) {
-                        LOGGER.log(Level.SEVERE, t.getMessage());
-                    }
-                    else {
-                        LOGGER.log(Level.SEVERE, "executing command", t);
-                    }
+                    LOGGER.log(Level.SEVERE, "executing command", t);
                     JSONObject error = new JSONObject().
                             put("success", false).
                             put("error", t.getMessage());
