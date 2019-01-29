@@ -1,0 +1,31 @@
+run:
+2019-01-29 13:21:36.393 CONFIG  [client.CommanderClient] configured /Users/julian/NetBeansProjects/clientcomponent/logging.properties 
+2019-01-29 13:21:36.545 CONFIG  [client.CommanderClient] registered devel.RemoteComponentTest 
+2019-01-29 13:21:36.600 INFO    [client.CommanderClient] stream start 
+2019-01-29 13:21:36.959 INFO    [devel.MyTwitterComponent] result is {"success":true,"status":{"date":"2019-01-29T13:21:36Z","hashtags":[],"reply_to_user_id":-1,"sensitive":false,"reply_to_status_id":-1,"liked":false,"retweeted":false,"status_id":1090223434414596097,"followers":1,"user_id":1087271356054601728,"text":"Sol, solet!","retweets":0,"lang":"en","user":"LaFerreriaDAM","likes":0}} 
+2019-01-29 13:21:36.965 INFO    [devel.RemoteComponentTest] {
+    "success": true,
+    "status": {
+        "date": "2019-01-29T13:21:36Z",
+        "hashtags": [],
+        "reply_to_user_id": -1,
+        "sensitive": false,
+        "reply_to_status_id": -1,
+        "liked": false,
+        "retweeted": false,
+        "status_id": 1090223434414596097,
+        "followers": 1,
+        "user_id": 1087271356054601728,
+        "text": "Sol, solet!",
+        "retweets": 0,
+        "lang": "en",
+        "user": "LaFerreriaDAM",
+        "likes": 0
+    }
+} 
+2019-01-29 13:21:41.960 INFO    [devel.MyTwitterComponent] got twitter event {"source":"twitter","type":"status","status":{"date":"2019-01-29T13:21:36Z","hashtags":[],"reply_to_user_id":-1,"sensitive":false,"reply_to_status_id":-1,"liked":false,"retweeted":false,"status_id":1090223434414596097,"followers":1,"user_id":1087271356054601728,"text":"Sol, solet!","retweets":0,"lang":"en","user":"LaFerreriaDAM","likes":0}} 
+2019-01-29 13:21:46.972 CONFIG  [client.CommanderClient] unregistered devel.RemoteComponentTest 
+2019-01-29 13:21:47.017 INFO    [client.CommanderClient] stream end 
+2019-01-29 13:21:47.018 INFO    [client.LoggingClient] closing client socket 
+BUILD SUCCESSFUL (total time: 10 seconds)
+
