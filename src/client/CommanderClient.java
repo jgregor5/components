@@ -112,11 +112,13 @@ public class CommanderClient implements IManager, IStreamListener {
     @Override
     public void registerListener(IEventListener listener) {
         this.listeners.add(listener);
+        LOGGER.log(Level.CONFIG, "registered {0}", listener.getClass().getName());        
     }
 
     @Override
     public void unregisterListener(IEventListener listener) {
         this.listeners.remove(listener);
+        LOGGER.log(Level.CONFIG, "unregistered {0}", listener.getClass().getName());
     }
     
     // STREAM LISTENER

@@ -46,6 +46,7 @@ public class LoggingTask implements Callable<Void>, IEventListener {
         PrintWriter pw = new PrintWriter(this.client.getOutputStream(), true); // autoflush 
         
         try {
+            // CommandServer will be listening
             this.source.registerListener(this);        
 
             while (this.enabled) {
@@ -81,8 +82,9 @@ public class LoggingTask implements Callable<Void>, IEventListener {
     }
     
     @Override
-    public void handleEvent(JSONObject event) {        
-        queue.add(event);
+    public void handleEvent(JSONObject event) {  
+        // receives events from CommanderServer and sends them to the queue
+        this.queue.add(event);
     }
     
 }

@@ -58,15 +58,27 @@ public class ComponentManager implements IEventListener, IManager {
                 }
             }
             
+            boolean isSource = false;
             if (component instanceof IEventSource) {
+                isSource = true;
                 ((IEventSource) component).registerListener(this);
             }
             
-            LOGGER.log(Level.CONFIG, "registered {0} from {1} version {2}", 
+            boolean isListener = false;
+            if (component instanceof IEventListener) {
+                isListener = true;
+                registerListener((IEventListener) component);
+            }
+            
+            LOGGER.log(Level.CONFIG, 
+                    "registered {0} from {1} version {2} source:{3} listener:{4}", 
                     new Object[]{
                         Arrays.toString(component.getCommands()), 
                         component.getName(), 
-                        getVersion(component)});     
+                        getVersion(component),
+                        isSource? "Y":"N",
+                        isListener? "Y":"N"
+                    });     
         }
     }
     
@@ -119,7 +131,7 @@ public class ComponentManager implements IEventListener, IManager {
     public synchronized void handleEvent(JSONObject event) {
         // events from components to a (network server?)
         LOGGER.log(Level.INFO, "event:{0}", event.toString(4));  
-        for (IEventListener listener: listeners) {
+        for (IEventListener listener: this.listeners) {
             listener.handleEvent(event);
         }
     }
@@ -128,11 +140,13 @@ public class ComponentManager implements IEventListener, IManager {
     public void registerListener(IEventListener listener) {
         // may be used by a network server
         this.listeners.add(listener);
+        LOGGER.log(Level.CONFIG, "registered {0}", listener.getClass().getName());
     }
 
     @Override
     public void unregisterListener(IEventListener listener) {
         this.listeners.remove(listener);
+        LOGGER.log(Level.CONFIG, "unregistered {0}", listener.getClass().getName());
     }
 
     /*
