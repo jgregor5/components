@@ -71,7 +71,7 @@ public class ComponentManager implements IEventListener, IManager {
             }
             
             LOGGER.log(Level.CONFIG, 
-                    "registered {0} from {1} version {2} source:{3} listener:{4}", 
+                    "added commands {0} from {1} version {2} source:{3} listener:{4}", 
                     new Object[]{
                         Arrays.toString(component.getCommands()), 
                         component.getName(), 
