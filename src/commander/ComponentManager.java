@@ -70,6 +70,10 @@ public class ComponentManager implements IEventListener, IManager {
                 registerListener((IEventListener) component);
             }
             
+            if (component instanceof IInitManager) {
+                ((IInitManager) component).setManager(this);
+            }
+            
             LOGGER.log(Level.CONFIG, 
                     "added commands {0} from {1} version {2} source:{3} listener:{4}", 
                     new Object[]{
