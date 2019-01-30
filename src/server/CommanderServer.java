@@ -90,10 +90,18 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
 
     // MAIN
     
+    private static CommanderServer instance;
+    
+    public static CommanderServer getInstance() {
+        return instance;
+    }
+    
     public static void main(String[] args) {
         
-        Thread thread = new Thread(new CommanderServer(
-                ComponentManager.COMMAND_PORT, ComponentManager.LISTEN_PORT), "commander-server");
+        instance = new CommanderServer(
+                ComponentManager.COMMAND_PORT, ComponentManager.LISTEN_PORT);
+        
+        Thread thread = new Thread(instance, "commander-server");
         thread.start();
     }
 
