@@ -67,6 +67,8 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
     public void close() {
         this.commandSH.close();
         this.loggingSH.close();
+        
+        ComponentManager.getInstance().close();
     }
     
     @Override
