@@ -41,11 +41,12 @@ public class CommandTask implements Callable<Void> {
                     pw.println(result);
                     
                 } catch (Throwable t) {
-                    LOGGER.log(Level.SEVERE, "executing command", t);
+                    LOGGER.log(Level.SEVERE, "executing " + line, t);
                     JSONObject error = new JSONObject().
                             put("success", false).
                             put("error", t.getMessage());
                     pw.println(error);
+                    break;
                 }
             }
 
