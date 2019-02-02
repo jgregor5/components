@@ -1,4 +1,4 @@
-package sample;
+package test.sample;
 
 import client.CommanderClient;
 import commander.ComponentManager;
