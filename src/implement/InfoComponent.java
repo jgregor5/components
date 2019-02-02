@@ -25,7 +25,9 @@ public class InfoComponent implements IComponent {
 
     @Override
     public JSONObject execute(JSONObject command) {        
-        return ComponentManager.getInstance().getComponentsInfo();
+        return new JSONObject().
+            put("sucess", true).
+            put("items", ComponentManager.getInstance().getComponentsInfo());
     }
     
 }

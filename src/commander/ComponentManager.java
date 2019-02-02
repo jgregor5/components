@@ -40,8 +40,25 @@ public class ComponentManager implements IEventListener, IManager {
     public static synchronized ComponentManager getInstance() {
         if (service == null) {
             service = new ComponentManager();
+            service.start();
         }
         return service;
+    }
+    
+    private void start() {
+        
+        Iterator<IComponent> components = this.loader.iterator();
+        while (components.hasNext()) {
+            IComponent component = components.next();
+            if (component instanceof IInitManager) {
+                LOGGER.log(Level.CONFIG, "setting manager for {0}", component.getName());
+                try {
+                    ((IInitManager) component).setManager(this);
+                } catch (Throwable t) {
+                    LOGGER.log(Level.SEVERE, "setting manager", t);
+                }
+            }
+        }
     }
     
     private void init() {
@@ -68,10 +85,6 @@ public class ComponentManager implements IEventListener, IManager {
             if (component instanceof IEventListener) {
                 isListener = true;
                 registerListener((IEventListener) component);
-            }
-            
-            if (component instanceof IInitManager) {
-                ((IInitManager) component).setManager(this);
             }
             
             LOGGER.log(Level.CONFIG, 
