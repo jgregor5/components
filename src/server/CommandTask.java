@@ -2,12 +2,14 @@ package server;
 
 import commander.ComponentManager;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -32,10 +34,19 @@ public class CommandTask implements Callable<Void> {
 
         try {
             String line;
-            while ((line = br.readLine()) != null) {                
+            while ((line = br.readLine()) != null) {   
+                
+                JSONObject command;
                 try {
-                    JSONObject command = new JSONObject(line);
-                    LOGGER.log(Level.INFO, "command:{0}", command.toString(4));
+                    command = new JSONObject(line);
+                } catch (JSONException ex) {
+                    // ignore non json commands
+                    break;
+                }
+                
+                LOGGER.log(Level.INFO, "command:{0}", command.toString(4));
+                
+                try {
                     JSONObject result = ComponentManager.getInstance().execute(command);
                     LOGGER.log(Level.INFO, "response:{0}", result.toString(4));
                     pw.println(result);
