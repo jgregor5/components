@@ -31,7 +31,7 @@ public class StorageComponent implements IComponent {
     }
     
     @Override
-    public JSONObject execute(JSONObject command) {
+    public synchronized JSONObject execute(JSONObject command) {
         
         String cmd = command.getString("command");
         String key = command.getString("key");
