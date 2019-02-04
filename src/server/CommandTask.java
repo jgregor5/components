@@ -2,10 +2,12 @@ package server;
 
 import commander.ComponentManager;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,11 +21,21 @@ import org.json.JSONObject;
 public class CommandTask implements Callable<Void> {
     
     private static final Logger LOGGER = Logger.getLogger(CommandTask.class.getName());
+    
+    private static final boolean ADD_REQUEST_IP = false;
 
     private final Socket client;
+    private final InetAddress ipAddress;
 
     public CommandTask(Socket client) {
         this.client = client;
+        SocketAddress remoteSA = this.client.getRemoteSocketAddress();
+        if (remoteSA instanceof InetSocketAddress) {
+            this.ipAddress = ((InetSocketAddress) remoteSA).getAddress();
+        }
+        else {
+            this.ipAddress = null;
+        }
     }
 
     @Override
@@ -39,6 +51,11 @@ public class CommandTask implements Callable<Void> {
                 JSONObject command;
                 try {
                     command = new JSONObject(line);
+                    if (ADD_REQUEST_IP) 
+                        command.put("from_ip", this.ipAddress.toString());
+                    else
+                        command.remove("from_ip");
+                    
                 } catch (JSONException ex) {
                     // ignore non json commands
                     break;
