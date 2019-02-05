@@ -71,6 +71,11 @@ public class CommanderServer implements Runnable, IEventListener, IEventSource, 
         ComponentManager.getInstance().close();
     }
     
+    public void halt() {
+        close();
+        System.exit(-1);
+    }
+    
     @Override
     public void handleEvent(JSONObject event) { 
         for (IEventListener listener: listeners) {

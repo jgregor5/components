@@ -56,16 +56,16 @@ public class CommandTask implements Callable<Void> {
                     else
                         command.remove("from_ip");
                     
+                    LOGGER.log(Level.INFO, "command:{0}", command.toString(4));
+                    
                 } catch (JSONException ex) {
                     // ignore non json commands
                     break;
                 }
                 
-                LOGGER.log(Level.INFO, "command:{0}", command.toString(4));
-                
                 try {
                     JSONObject result = ComponentManager.getInstance().execute(command);
-                    LOGGER.log(Level.INFO, "response:{0}", result.toString(4));
+                    LOGGER.log(Level.INFO, "response:{0}", result.toString(4));                   
                     pw.println(result);
                     
                 } catch (Throwable t) {
@@ -88,5 +88,4 @@ public class CommandTask implements Callable<Void> {
 
         return null;
     }
-
 }
