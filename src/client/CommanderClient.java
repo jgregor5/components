@@ -65,22 +65,18 @@ public class CommanderClient implements IManager, IStreamListener {
     }
     
     private void openIfNeeded() {
-        if (this.logging == null) {
-            connect(this.cport == 0? 
-                    ComponentManager.COMMAND_PORT : this.cport);
+        
+        if (this.logging == null && this.cport > 0) {
+            connect(this.cport);
         }
-        if (this.logging == null) {
-            listen(this.lport == 0? 
-                    ComponentManager.LISTEN_PORT : this.lport);
+        
+        if (this.logging == null && this.lport > 0) {
+            listen(this.lport);
         }
     }
     
     public void listen(int port) {
         this.lport = port;
-        listen();
-    }
-    
-    private void listen() {
         this.logging = new LoggingClient(this.host, this.lport, this);
         new Thread(this.logging, "commander-client").start();
     }
@@ -91,12 +87,7 @@ public class CommanderClient implements IManager, IStreamListener {
     }
     
     public void connect(int port) {
-        this.cport = port;
-        connect();
-    }
-    
-    private void connect() {
-        
+        this.cport = port;       
         try {
             this.socket = new Socket(this.host, this.cport);
             this.socket.setSoTimeout(SO_TIMEOUT_MILLIS);
