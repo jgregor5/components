@@ -87,6 +87,21 @@
         </jar>
     </target>
     
+    <target name="commander-src" depends="compile">
+        
+        <manifest file="MANIFEST.MF">
+            <attribute name="Implementation-Version" value="${version}"/> 
+            <attribute name="Built-By" value="${builder}"/>
+        </manifest>
+        
+        <jar destfile="dist/commander-src-${version}.jar" manifest="MANIFEST.MF">
+            <fileset dir="src">
+                <include name="client/**"/>
+                <include name="commander/**"/>
+            </fileset>
+        </jar>
+    </target>
+    
     <target name="commander" depends="compile">
         
         <manifest file="MANIFEST.MF">
