@@ -9,7 +9,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -23,6 +26,8 @@ public class ComponentManager implements IEventListener, IManager {
     
     private final static Logger LOGGER = Logger.getLogger(ComponentManager.class.getName());
     
+    private static final long POLL_TIMEOUT = 5000;
+    
     public final static int COMMAND_PORT = 9000;
     public final static int LISTEN_PORT = 9001;
     
@@ -30,14 +35,25 @@ public class ComponentManager implements IEventListener, IManager {
     private ServiceLoader<IComponent> loader;
     private Map<String, IComponent> commands;
     private Set<IEventListener> listeners;
+    
+    private QueueConsumer consumer;
+    private Thread queueThread;
+    private BlockingQueue<JSONObject> queue;    
 
-    private ComponentManager() {        
+    private ComponentManager() { 
+        
         this.loader = ServiceLoader.load(IComponent.class);
         this.listeners = new CopyOnWriteArraySet<>();
+        
+        this.queue = new ArrayBlockingQueue<>(1024);
+        this.consumer = new QueueConsumer();
+        this.queueThread = new Thread(this.consumer, "dispatcher");
+        
         init();
     }
     
     public static synchronized ComponentManager getInstance() {
+        
         if (service == null) {
             service = new ComponentManager();
             service.start();
@@ -59,6 +75,8 @@ public class ComponentManager implements IEventListener, IManager {
                 }
             }
         }
+        
+        this.queueThread.start();
     }
     
     private void init() {
@@ -97,10 +115,15 @@ public class ComponentManager implements IEventListener, IManager {
                         isListener? "Y":"N"
                     });     
         }
+                
     }
     
     @Override
     public void close() {
+        
+        this.consumer.finish();
+        this.queueThread.interrupt();
+        
         Iterator<IComponent> components = this.loader.iterator();
         while (components.hasNext()) {
             IComponent component = components.next();
@@ -145,12 +168,10 @@ public class ComponentManager implements IEventListener, IManager {
     }
     
     @Override
-    public synchronized void handleEvent(JSONObject event) {
-        // events from components to a (network server?)
-        LOGGER.log(Level.INFO, "event:{0}", event.toString(4));  
-        for (IEventListener listener: this.listeners) {
-            listener.handleEvent(event);
-        }
+    public void handleEvent(JSONObject event) {
+        
+        LOGGER.log(Level.INFO, "queue event:{0}", event.toString(4));  
+        this.queue.add(event);
     }
     
     @Override
@@ -165,17 +186,6 @@ public class ComponentManager implements IEventListener, IManager {
         this.listeners.remove(listener);
         LOGGER.log(Level.CONFIG, "unregistered {0}", listener.getClass().getName());
     }
-
-    /*
-    @Override
-    public String getName() {
-        return this.getClass().getSimpleName();
-    }
-
-    @Override
-    public String[] getCommands() {
-        return this.commands.keySet().toArray(new String[this.commands.size()]);
-    }*/
 
     @Override
     public JSONObject execute(JSONObject command) {
@@ -220,10 +230,55 @@ public class ComponentManager implements IEventListener, IManager {
             }
         }
     }
+    
+    private class QueueConsumer implements Runnable {
+
+        private boolean finish;
+        
+        public QueueConsumer() {
+            this.finish = false;
+        }
+        
+        public void finish() {
+            this.finish = true;
+        }
+        
+        @Override
+        public void run() {
+            
+            while (!this.finish) {
+                
+                try {
+                    JSONObject event = ComponentManager.this.queue.poll(
+                            POLL_TIMEOUT, TimeUnit.MILLISECONDS);
+                    
+                    if (event == null) {
+                        continue;
+                    }
+                    
+                    LOGGER.log(Level.INFO, "dispatch event:{0}", event.toString(4));  
+                    for (IEventListener listener: ComponentManager.this.listeners) {
+                        try {
+                            listener.handleEvent(event);
+                        } catch (Exception ex) {
+                            LOGGER.log(Level.SEVERE, 
+                                    "dispatching event to " + listener.getClass().getName(), ex);
+                        }
+                    }
+                    
+                } catch (InterruptedException ex) {
+                    LOGGER.log(Level.WARNING, "consumer interrupted");
+                }
+            }
+            
+            LOGGER.log(Level.CONFIG, "finished queue consumer");
+        }
+        
+    }
 
     public static void main(String[] args) {
         // for testing purposes
-        getInstance();
+        getInstance().close();
     }
 
 }

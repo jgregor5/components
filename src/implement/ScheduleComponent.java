@@ -33,7 +33,8 @@ public class ScheduleComponent implements IComponent, IInitManager, IEventSource
     private final Timer timer;
     
     public ScheduleComponent() {
-        this.timer = new Timer();
+        
+        this.timer = new Timer("schedule");
         this.listeners = new HashSet<>(); 
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); 
         this.dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Madrid"));
