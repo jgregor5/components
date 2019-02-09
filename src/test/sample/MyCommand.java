@@ -15,18 +15,20 @@ public class MyCommand {
  
     public static void main(String[] args) {
         
-        ComponentManager service = ComponentManager.getInstance();
+        try (ComponentManager service = ComponentManager.getInstance()) {
         
-        JSONObject command = new JSONObject().put("command", "hello");
-        JSONObject result = service.execute(command);
-        LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
-                
-        command = new JSONObject().put("command", "bye");
-        result = service.execute(command);
-        LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
+            JSONObject command = new JSONObject().put("command", "hello");
+            JSONObject result = service.execute(command);
+            LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
+
+            command = new JSONObject().put("command", "bye");
+            result = service.execute(command);
+            LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
+
+            command = new JSONObject().put("command", "whoami");
+            result = service.execute(command);
+            LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
         
-        command = new JSONObject().put("command", "whoami");
-        result = service.execute(command);
-        LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
+        }
     }
 }

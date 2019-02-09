@@ -38,12 +38,14 @@ public class MyComponent2 implements IComponent {
     
     public static void main(String[] args) {
         
-        ComponentManager manager = ComponentManager.getInstance();        
-        LOGGER.log(Level.INFO, "version is {0}", manager.getClass().getPackage().getImplementationVersion());
-        
-        JSONObject command = new JSONObject().put("command", "bye");
-        JSONObject result = manager.execute(command);
-        LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
+        try (ComponentManager manager = ComponentManager.getInstance()) {
+            LOGGER.log(Level.INFO, "version is {0}", 
+                    manager.getClass().getPackage().getImplementationVersion());
+
+            JSONObject command = new JSONObject().put("command", "bye");
+            JSONObject result = manager.execute(command);
+            LOGGER.log(Level.INFO, "result:{0}", result.toString(4));
+        }
     }    
     
 }
