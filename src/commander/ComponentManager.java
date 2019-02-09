@@ -267,7 +267,7 @@ public class ComponentManager implements IEventListener, IManager {
                     }
                     
                 } catch (InterruptedException ex) {
-                    LOGGER.log(Level.WARNING, "consumer interrupted");
+                    LOGGER.log(Level.CONFIG, "consumer interrupted");
                 }
             }
             
