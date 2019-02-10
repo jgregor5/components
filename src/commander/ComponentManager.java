@@ -90,8 +90,8 @@ public class ComponentManager implements IEventListener, IManager {
             IComponent component;
             try {
                 component = components.next();
-            } catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, "failed to load component", ex);
+            } catch (Throwable t) {
+                LOGGER.log(Level.SEVERE, "failed to load component", t);
                 continue;
             }
             
