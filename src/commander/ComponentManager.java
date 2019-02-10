@@ -86,7 +86,15 @@ public class ComponentManager implements IEventListener, IManager {
         this.commands = new HashMap<>();
         Iterator<IComponent> components = this.loader.iterator();
         while (components.hasNext()) {
-            IComponent component = components.next();
+            
+            IComponent component;
+            try {
+                component = components.next();
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "failed to load component", ex);
+                continue;
+            }
+            
             for (String command: component.getCommands()) {
                 if (this.commands.put(command, component) != null) {
                     throw new RuntimeException("command already registered: " + command);
