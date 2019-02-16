@@ -71,7 +71,7 @@ public class ComponentManager implements IEventListener, IManager {
                 try {
                     ((IInitManager) component).setManager(this);
                 } catch (Throwable t) {
-                    LOGGER.log(Level.SEVERE, "setting manager", t);
+                    LOGGER.log(Level.SEVERE, "failed to set manager", t);
                 }
             }
         }
@@ -87,41 +87,46 @@ public class ComponentManager implements IEventListener, IManager {
         Iterator<IComponent> components = this.loader.iterator();
         while (components.hasNext()) {
             
-            IComponent component;
             try {
-                component = components.next();
+                IComponent component = components.next();
+                LOGGER.log(Level.CONFIG, "configuring {0}", component.getName());
+                
+                for (String command: component.getCommands()) {
+                    if (this.commands.containsKey(command)) {
+                        throw new RuntimeException("command already registered: " + command);
+                    }
+                    else {
+                        this.commands.put(command, component);
+                    }
+                }
+
+                boolean isSource = false;
+                if (component instanceof IEventSource) {
+                    isSource = true;
+                    ((IEventSource) component).registerListener(this);
+                }
+
+                boolean isListener = false;
+                if (component instanceof IEventListener) {
+                    isListener = true;
+                    registerListener((IEventListener) component);
+                }
+
+                LOGGER.log(Level.CONFIG, 
+                        "added commands {0} from {1} version {2} source:{3} listener:{4}", 
+                        new Object[]{
+                            Arrays.toString(component.getCommands()), 
+                            component.getName(), 
+                            getVersion(component),
+                            isSource? "Y":"N",
+                            isListener? "Y":"N"
+                        });                  
+                
             } catch (Throwable t) {
                 LOGGER.log(Level.SEVERE, "failed to load component", t);
-                continue;
             }
             
-            for (String command: component.getCommands()) {
-                if (this.commands.put(command, component) != null) {
-                    throw new RuntimeException("command already registered: " + command);
-                }
-            }
-            
-            boolean isSource = false;
-            if (component instanceof IEventSource) {
-                isSource = true;
-                ((IEventSource) component).registerListener(this);
-            }
-            
-            boolean isListener = false;
-            if (component instanceof IEventListener) {
-                isListener = true;
-                registerListener((IEventListener) component);
-            }
-            
-            LOGGER.log(Level.CONFIG, 
-                    "added commands {0} from {1} version {2} source:{3} listener:{4}", 
-                    new Object[]{
-                        Arrays.toString(component.getCommands()), 
-                        component.getName(), 
-                        getVersion(component),
-                        isSource? "Y":"N",
-                        isListener? "Y":"N"
-                    });     
+               
         }
                 
     }
@@ -139,7 +144,7 @@ public class ComponentManager implements IEventListener, IManager {
                 try {
                     ((AutoCloseable) component).close();
                 } catch (Throwable t) {
-                    LOGGER.log(Level.SEVERE, "closing component", t);
+                    LOGGER.log(Level.SEVERE, "failed to close component", t);
                 }
             }
         }
