@@ -26,7 +26,8 @@ public class StorageComponent implements IComponent {
     @Override
     public String[] getCommands() {
         return new String[]{
-            "storage.load", "storage.save", "storage.delete", "storage.loadorsave"
+            "storage.load", "storage.save", "storage.delete", "storage.loadorsave",
+            "storage.set", "storage.get"
         };
     }
     
@@ -50,6 +51,10 @@ public class StorageComponent implements IComponent {
                 return exdelete(key);
             case "storage.loadorsave":                
                 return exloadorsave(key, command.getJSONObject("data"));                
+            case "storage.set":
+                return exset(key, command.getString("property"), command.opt("value"));
+            case "storage.get":
+                return exget(key, command.getString("property"));
             default: 
                 throw new UnsupportedOperationException("unsupported command " + cmd);
         }
@@ -124,4 +129,34 @@ public class StorageComponent implements IComponent {
         }
     }
     
+    private JSONObject exset(String key, String property, Object value) {
+        
+        JSONObject result = exload(key);
+        if (result.getBoolean("success")) {
+            if (value == null) {
+                value = JSONObject.NULL;
+            }            
+            JSONObject data = result.getJSONObject("data");
+            data.put(property, value);
+            return exsave(key, data);
+        }
+        else {
+            return result;
+        }
+    }
+    
+    private JSONObject exget(String key, String property) {
+    
+        JSONObject result = exload(key);
+        if (result.getBoolean("success")) {
+            Object value = result.getJSONObject("data").opt(property);
+            if (value == null) {
+                value = JSONObject.NULL;
+            }
+            return new JSONObject().put("success", true).put("value", value);
+        }
+        else {
+            return result;
+        }
+    }
 }
