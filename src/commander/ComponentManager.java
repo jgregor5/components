@@ -183,8 +183,13 @@ public class ComponentManager implements IEventListener, IManager {
     @Override
     public void handleEvent(JSONObject event) {
         
-        LOGGER.log(Level.INFO, "queue event:{0}", event.toString(4));  
-        this.queue.add(event);
+        if (event.has("source") && event.has("type")) {
+            LOGGER.log(Level.INFO, "queue event:{0}", event.toString(4));  
+            this.queue.add(event);            
+        }
+        else {
+            LOGGER.log(Level.SEVERE, "wrong event format:{0}", event.toString(4));  
+        }
     }
     
     @Override
